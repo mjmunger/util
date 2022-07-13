@@ -8,5 +8,8 @@
       "psr-4": {
         "hphio\\util\\": "src"
       }
-  }
+  },
+    "require": {
+        "league/container": "^4.2"
+    }
 }
