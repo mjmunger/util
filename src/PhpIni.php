@@ -10,6 +10,11 @@ namespace hphio\util;
 
 class PhpIni
 {
+    /**
+     * @param string $option
+     * @return false|string
+     * @codeCoverageIgnore
+     */
     public function getOption(string $option) {
         return ini_get($option);
     }
