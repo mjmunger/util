@@ -1,66 +1,61 @@
 # util
 Utility classes for doing various tasks.
 
-# WonderQueryBuilder
+## IniUploadManager
 
-Example use. Let's say you wanted to find the user id of all the users that had a substring of "com" and "nel"
-in their email address. You need to produce this query:
-````
-SELECT
-    users_id
-FROM
-    users
-WHERE
-    (users_email LIKE '%com%'
-        AND users_email LIKE '%nel%')
-        OR ((users_email LIKE '%com%'
-        AND users_email LIKE '%nel%'))
-````
+### Summary
+This class reads the php.ini file, and returns information about allowed upload sizes.
 
-You would create it this way:
-````
-$builder = new WonderQueryBuilder();
-$builder->setsetTable('users');
-$builder->addSelectField('users_id');
-$builder->addSearchField('users_email');
-$sql = $builder->renderSQL([ 'com', 'nel']);
-````
+### Dependencies
 
-It supports multiple fields and multiple search terms.
+Requires these classes, which are included in this package.
 
-## Complex example
+- hphio\util\ByteValueInterpreter\HumanReadable
+- hphio\util\ByteValueInterpreter\RawInteger
+- hphio\util\PhpIni (a wrapper for `ini_get()`)
 
-Suppose I want to return results where any of the following fields
-contain all of the search terms I want, and only return certain fields:
 
-````
-$builder = new WonderQueryBuilder();
-$builder->setsetTable('footable');
-$builder->addSelectField('field1');
-$builder->addSelectField('field2');
-$builder->addSelectField('field3');
-$builder->addSelectField('field4');
-$builder->addSearchField('foo');
-$builder->addSearchField('bar');
-$sql = $builder->renderSql(['baz', 'boom', 'blau']);
+## Usage:
+Assuming the following ini values:
+```ini
+post_max_size=8k
+upload_max_filesize=7M
+```
 
-```` 
-Will produce the following query:
+This code can used as follows:
+```
+$manager = $container->get(IniUploadManager::class);  
+echo $manager->getMaxUpload(); //7340032  
+echo $manager->getMaxPost(); //8192  
+echo $manager->getUploadLimit(); //8192  
+```
 
-````
-SELECT 
-    `field1`,
-    `field2`,
-    `field3`,
-    `field4`,
-FROM
-    footable
-WHERE
-    (
-        (
-            (`foo` LIKE '%baz%') AND (`foo` LIKE '%boom%') AND (`foo` LIKE '%blau%')
-        ) OR (
-            (`bar` LIKE '%baz%') AND (`bar` LIKE '%boom%') AND (`bar` LIKE '%blau%')
-        )
-    )
-````
+## ByteValueInterpreter
+
+### Summary
+
+A series of classes for converting ini values (like '8M') into their actual integer values.
+
+### Usage
+
+Add dependencies to the container.
+```
+$container = new Container();
+$container->add(RawInteger::class);
+$container->add(HumanReadable::class);
+```
+
+It can interpret human readable shortcut values:
+```
+$value = '8M';
+$obj = ByteValueFactory::getByteInterpreter($container, $value);
+$obj->getBytes($value); //8388608
+```
+
+And will interpret raw integer values as well:
+
+```
+$value = '8388608';
+$obj = ByteValueFactory::getByteInterpreter($container, $value);
+$obj->getBytes($value); //8388608
+```
