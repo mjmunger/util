@@ -1,3 +1,3 @@
 <?php
 
-include('autoload.php');
+include('vendor/autoload.php');
