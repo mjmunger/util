@@ -5,3 +5,4 @@ database.json
 composer.lock
 phpunit
 composer.phar
+/coverage.xml
