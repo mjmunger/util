@@ -1,8 +1,8 @@
 <?php
 /**
- * @namspace hphio\util\AgoTime
+ * @namspace hphio\util\PeopleTime
  * @name ScopedPeriodInterface
- * Summary: #$END$#
+ * Summary: Ensures that all period classes return a relative people time.
  *
  * Date: 2023-01-11
  * Time: 4:18 PM

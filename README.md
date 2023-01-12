@@ -1,6 +1,26 @@
 # util
 Utility classes for doing various tasks.
 
+## PeopleTime
+
+### Summary
+This class accepts two unix timestamps, and returns the human-readable, relative time for the interval between the two.
+
+### Usage:
+```php
+$endTime = 1675209600;
+$startTime = 1676470379;
+$relativeTime = PeopleTime::calculate($endTime, $startTime);
+echo $relativeTime; // "14 days"
+```
+
+$startTime is optional. If you leave do not specify it, it will use "now".
+```php
+$endTime = 2018748556;
+$relativeTime = PeopleTime::calculate($endTime);
+echo $relativeTime; // "11 years"
+```
+
 ## IniUploadManager
 
 ### Summary

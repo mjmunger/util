@@ -1,8 +1,9 @@
 <?php
+
 /**
  * @namspace hphio\util\PeopleTime
  * @name PeopleDays
- * Summary: #$END$#
+ * Summary: Represents a day.
  *
  * Date: 2023-01-11
  * Time: 4:35 PM

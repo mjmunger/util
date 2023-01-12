@@ -2,7 +2,7 @@
 /**
  * @namspace hphio\util\PeopleTime
  * @name PeopleMonths
- * Summary: #$END$#
+ * Summary: Represents a month.
  *
  * Date: 2023-01-11
  * Time: 4:32 PM

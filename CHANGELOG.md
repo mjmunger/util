@@ -6,7 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Planning an upgrade to support php 8.x.
+## [1.2.1]
+### Changed
+- Updated Readme
+- Added docblocks for PeopleTime
+- Updated Changelog.
 
+## [1.2.0]
+### Added
+- PeopleTime
+- 
 ## [1.0.0] - 2022-07-13
 ### Added
 - IniUploadManager - A class for reading the php.ini file and determining what the max_upload_size and max_post_sizes are. It can read raw integer values or the human readable shortcuts as defined [here](https://www.php.net/manual/en/ini.core.php#ini.post-max-size)

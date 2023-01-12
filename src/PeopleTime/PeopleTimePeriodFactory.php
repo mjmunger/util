@@ -18,6 +18,13 @@ use DateTime;
 
 class PeopleTimePeriodFactory
 {
+    /**
+     * This method relies on a cascading check of year, month, day, hour, minute, and second values.
+     * The first non-zero value (checked from largest to smallest period of time) becomes the relative time.
+     * @param DateTime $start
+     * @param DateTime $end
+     * @return ScopedPeriodInterface
+     */
     public static function getScopedPeriod(DateTime $start, DateTime $end): ScopedPeriodInterface
     {
         $interval = $end->diff($start);
