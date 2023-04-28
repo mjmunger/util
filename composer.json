@@ -5,14 +5,20 @@
   "require-dev": {
     "phpunit/phpunit": "^9"
   },
-  "autoload": {
+  "autoload-dev": {
     "psr-0": {
-      "hphio\\util\\": "src",
       "tests\\": "tests"
     },
     "psr-4": {
-      "hphio\\util\\": "src",
       "tests\\": "tests"
+    }
+  },
+  "autoload": {
+    "psr-0": {
+      "hphio\\util\\": "src"
+    },
+    "psr-4": {
+      "hphio\\util\\": "src"
     }
   },
   "require": {
