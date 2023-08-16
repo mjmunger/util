@@ -37,6 +37,6 @@ abstract class PeoplePeriod implements ScopedPeriodInterface
     protected function formatInterval(int $interval, string $suffix): string
     {
         if($interval > 1) $suffix .= 's';
-        return sprintf("%s %s", $interval, $suffix);
+        return sprintf("%s %s ago", $interval, $suffix);
     }
 }
