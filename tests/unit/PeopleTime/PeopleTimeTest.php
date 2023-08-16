@@ -50,7 +50,8 @@ class PeopleTimeTest extends TestCase
             $this->oneMinuteExample(),
             $this->secondsExample(),
             $this->oneSecondExample(),
-            $this->nowTime()
+            $this->nowTime(),
+            $this->justNow()
         ];
     }
 
@@ -215,5 +216,13 @@ class PeopleTimeTest extends TestCase
         $endTime = 1672578976;
         $expectedException = new Exception("End timestamp cannot be before the starting timestamp.", 501);
         return [$startTime, $endTime, $expectedException];
+    }
+
+    private function justNow(): array
+    {
+        $startTime = 1675209600;
+        $endTime =   1675209600;
+        $expectedString = 'Just now';
+        return [$startTime, $endTime, $expectedString];
     }
 }
