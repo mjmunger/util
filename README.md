@@ -1,7 +1,56 @@
 # util
 Utility classes for doing various tasks.
 
-## PDF\VersionParser
+## Helpers
+These are utility wrappers of system functions, which should be used to perform system operations because they can easily be mocked in tests.
+
+### ShellExec
+Use this to run command line utilities. It is a wrapper for `shell_exec()`. It is a class so that it can be mocked in tests.
+```php
+$shell = new ShellExec();
+$cwd = sys_get_temp_dir();
+$shell->exec("echo 'test' && echo 'error test' >&2", $cwd);
+```
+
+Running the example above will print *test* to stdout, and *error test* to stderr. You can retrieve the output of both streams by calling the `getStdout()` and `getStderr()` methods.
+
+This is very useful in preventing output from going to the screen with command line utils that dump logging information to `stderr`.
+
+### Tempdir
+Use this to get a temporary directory.
+
+```php
+$tempdir = new Tempdir();
+$path = $tempdir->create();
+```
+
+## Tempfile
+Use this to get a temporary file.
+
+```php
+$tempfile = new Tempfile();
+$path = $tempfile->create();
+```
+
+## PDF
+### Ghostscript
+
+This class is used to downgrade / convert files from a newer version of PDF version 1.4 so that FPDi, FPDF, and other libraries can use it. It uses Ghostscript to do the conversion.
+
+Usage:
+```php
+$container = new Container();
+$container->add(ShellExec::class);
+$container->add(VersionParser::class);
+$container->add(GhostScript::class)->addArgument($container);
+
+$ghostscript = $container->get(GhostScript::class);
+$pathToPdfFile = '/path/to/file.pdf';
+$outputfile = '/path/to/output.pdf';
+$ghostscript->downgrade($pathToPdfFile, $outputfile);
+```
+
+### PDF\VersionParser
 This class read a PDF file, and parses out the version of the PDF for that file. The method: `getVersion()` returns a string, like "1.4" or "1.7". 
 Example usage:
 ```php
