@@ -50,7 +50,8 @@ class PeopleTimeTest extends TestCase
             $this->oneMinuteExample(),
             $this->secondsExample(),
             $this->oneSecondExample(),
-            $this->nowTime()
+            $this->nowTime(),
+            $this->justNow()
         ];
     }
 
@@ -58,7 +59,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1672578977;
         $endTime = 2018748556;
-        $expectedString = '10 years';
+        $expectedString = '10 years ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -66,7 +67,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1672578977;
         $endTime = 1706883438;
-        $expectedString = '1 year';
+        $expectedString = '1 year ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -74,7 +75,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1672578977;
         $endTime = 1703302156;
-        $expectedString = '11 months';
+        $expectedString = '11 months ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -82,7 +83,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1675209600;
         $endTime = 1676470379;
-        $expectedString = '14 days';
+        $expectedString = '14 days ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -90,7 +91,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1675209600;
         $endTime = 1675260779;
-        $expectedString = '14 hours';
+        $expectedString = '14 hours ago';
 
         return [$startTime, $endTime, $expectedString];
     }
@@ -99,7 +100,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1675209600;
         $endTime = 1675210379;
-        $expectedString = '12 minutes';
+        $expectedString = '12 minutes ago';
 
         return [$startTime, $endTime, $expectedString];
     }
@@ -108,7 +109,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1675209600;
         $endTime = 1675209659;
-        $expectedString = '59 seconds';
+        $expectedString = '59 seconds ago';
 
         return [$startTime, $endTime, $expectedString];
     }
@@ -117,7 +118,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1672531200;
         $endTime = 1675087979;
-        $expectedString = '29 days';
+        $expectedString = '29 days ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -125,7 +126,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1675209600;
         $endTime = 1677766379;
-        $expectedString = '1 month';
+        $expectedString = '1 month ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -133,7 +134,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1675209600;
         $endTime = 1677679979;
-        $expectedString = '1 month';
+        $expectedString = '1 month ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -141,7 +142,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1672578977;
         $endTime = 1672669038;
-        $expectedString = '1 day';
+        $expectedString = '1 day ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -149,7 +150,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1675209600;
         $endTime = 1677679979;
-        $expectedString = '1 month';
+        $expectedString = '1 month ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -157,7 +158,7 @@ class PeopleTimeTest extends TestCase
     {
         $startTime = 1675209600;
         $endTime = 1675209719;
-        $expectedString = '1 minute';
+        $expectedString = '1 minute ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -166,7 +167,7 @@ class PeopleTimeTest extends TestCase
 
         $startTime = 1675209600;
         $endTime = 1675209601;
-        $expectedString = '1 second';
+        $expectedString = '1 second ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -182,7 +183,7 @@ class PeopleTimeTest extends TestCase
 
         $startTime = $start->getTimestamp();
         $endTime = $end->getTimestamp();
-        $expectedString = '1 minute';
+        $expectedString = '1 minute ago';
         return [$startTime, $endTime, $expectedString];
     }
 
@@ -215,5 +216,13 @@ class PeopleTimeTest extends TestCase
         $endTime = 1672578976;
         $expectedException = new Exception("End timestamp cannot be before the starting timestamp.", 501);
         return [$startTime, $endTime, $expectedException];
+    }
+
+    private function justNow(): array
+    {
+        $startTime = 1675209600;
+        $endTime =   1675209600;
+        $expectedString = 'Just now';
+        return [$startTime, $endTime, $expectedString];
     }
 }

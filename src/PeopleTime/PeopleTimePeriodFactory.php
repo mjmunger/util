@@ -35,6 +35,7 @@ class PeopleTimePeriodFactory
         if($interval->h > 0) return new PeopleHours($interval);
         if($interval->i > 0) return new PeopleMinutes($interval);
         if($interval->s > 0) return new PeopleSeconds($interval);
+        return new PeopleJustNow($interval);
 
     }
 }
