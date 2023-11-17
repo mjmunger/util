@@ -39,6 +39,7 @@ class VersionParserTest extends TestCase
     public function providerTestGetVersion(): array
     {
         return [
+            $this->sixteen(),
             $this->fourteen(),
             $this->seventeen()
         ];
@@ -86,5 +87,12 @@ class VersionParserTest extends TestCase
         $sourceFile = dirname(__FILE__) . "/fixtures/this-should-not-exist.pdf";
 
         return [$sourceFile, new PDFNotFound("PDF not found: {$sourceFile}")];
+    }
+
+    private function sixteen(): array
+    {
+        $sourceFile = dirname(__FILE__) . "/fixtures/pdf-v1.6.pdf";
+        $version = "1.6";
+        return [$sourceFile, $version];
     }
 }

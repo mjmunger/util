@@ -38,6 +38,8 @@ class VersionParser
         $header = fgets($stream);
         $header = trim($header);
         $version = str_replace('%PDF-', '', $header);
+        $version = substr($version, 0, 3);
+
         fclose($stream);
         return $version;
     }
