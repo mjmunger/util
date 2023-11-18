@@ -16,6 +16,7 @@ namespace hphio\util\PDF\Helpers;
 use hphio\util\Exceptions\PackageNotInstalled;
 use hphio\util\Helpers\ShellExec;
 use hphio\util\PDF\Exceptions\PageCountMismatch;
+use hphio\util\PDF\Exceptions\PDFNoPages;
 use League\Container\Container;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -45,7 +46,7 @@ class GhostScript
         $sourceInfo->analyzePdf($inputFile);
 
         if($sourceInfo->pageCount() == 0) {
-            throw new \Exception("Source PDF had no pages. Cannot downgrade. ({$inputFile})");
+            throw new PDFNoPages("Source PDF had no pages. Cannot downgrade. ({$inputFile})");
         }
 
         $command = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sOutputFile=$outputFile {$inputFile}";
