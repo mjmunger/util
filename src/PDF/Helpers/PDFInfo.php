@@ -57,12 +57,13 @@ class PDFInfo
             if (empty($line)) continue;
             $parts = explode(":", $line, 2);
             $key = $this->translate(trim($parts[0]));
+            if(!$key) continue;
             $value = trim($parts[1]);
             if (property_exists($this, $key)) $this->$key = $value;
         }
     }
 
-    protected function translate($key): string
+    protected function translate($key): string|false
     {
         $map = ["Title" => 'title',
             "Creator" => 'creator',
@@ -83,6 +84,7 @@ class PDFInfo
             "PDF version" => 'pdfVersion',
             'Author' => 'author'
         ];
+        if(!in_array($key, $map)) return false;
         return $map[$key];
     }
 
