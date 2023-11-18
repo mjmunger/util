@@ -41,6 +41,10 @@ class GhostScript
         $sourceInfo = $this->container->get(PDFInfo::class);
         $sourceInfo->analyzePdf($inputFile);
 
+        if($sourceInfo->pageCount() == 0) {
+            throw new \Exception("Source PDF had no pages. Cannot downgrade. ({$inputFile})");
+        }
+
         $command = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sOutputFile=$outputFile '{$inputFile}'";
         $shell = $this->container->get(ShellExec::class);
         $shell->exec($command);
