@@ -84,7 +84,7 @@ class PDFInfo
             "PDF version" => 'pdfVersion',
             'Author' => 'author'
         ];
-        if(!in_array($key, $map)) return false;
+        if(!array_key_exists($key, $map)) return false;
         return $map[$key];
     }
 
