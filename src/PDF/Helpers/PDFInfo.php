@@ -90,6 +90,7 @@ class PDFInfo
 
     public function pageCount():int
     {
+        if(is_null($this->pages)) return 0;
         return $this->pages;
     }
 }
