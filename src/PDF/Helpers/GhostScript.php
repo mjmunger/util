@@ -47,8 +47,8 @@ class GhostScript
         $targetInfo = $this->container->get(PDFInfo::class);
         $targetInfo->analyzePdf($outputFile);
 
-        if($sourceInfo->pages != $targetInfo->pages) {
-            throw new \Exception("Downgrade failed. Source PDF had {$sourceInfo->pages} pages, but the target PDF had {$targetInfo->pages} pages.");
+        if($sourceInfo->pageCount() != $targetInfo->pageCount()) {
+            throw new \Exception("Downgrade failed. Source PDF had {$sourceInfo->pageCount()} pages, but the target PDF had {$targetInfo->pageCount()} pages.");
         }
     }
 

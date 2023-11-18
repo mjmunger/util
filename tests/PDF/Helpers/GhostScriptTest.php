@@ -13,6 +13,7 @@
 
 namespace tests\PDF\Helpers;
 
+use Exception;
 use hphio\util\Exceptions\PackageNotInstalled;
 use hphio\util\Helpers\ShellExec;
 use hphio\util\PDF\Helpers\GhostScript;
@@ -63,13 +64,87 @@ class GhostScriptTest extends TestCase
 
     /**
      * @param Container $container
+     * @param string    $sourcePDFPath
+     * @param string    $expectedVersion
+     *
+     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @dataProvider providerTestDowngradeExceptions
+     */
+    public function testDowngradeException(Container $container,
+                                           string    $sourcePDFPath,
+                                           string    $expectedVersion,
+                                           Exception $expectedException
+    )
+    {
+        $shell = $container->get(GhostScript::class);
+        $this->assertFileExists($sourcePDFPath);
+
+        $tempfile = tempnam(sys_get_temp_dir(), 'test_') . ".pdf";
+        $this->expectExceptionObject($expectedException);
+        $shell->downgrade($sourcePDFPath, $tempfile);
+//
+//        $this->assertFileExists($tempfile);
+//
+//        $version = $container->get(VersionParser::class);
+//        $this->assertSame($expectedVersion, $version->getVersion($tempfile));
+//
+//        $sourceInfo = $container->get(PDFInfo::class);
+//        $targetInfo = $container->get(PDFInfo::class);
+//
+//        $sourceInfo->analyzePdf($sourcePDFPath);
+//        $targetInfo->analyzePdf($tempfile);
+//
+//        $this->assertSame($sourceInfo->pages, $targetInfo->pages);
+//
+//        unlink($tempfile);
+//
+//        $this->assertFileDoesNotExist($tempfile);
+    }
+
+    public
+    function providerTestDowngradeExceptions(): array
+    {
+        return [
+            $this->downgradeFailedPageCountCheck()
+        ];
+    }
+
+    private
+    function downgradeFailedPageCountCheck(): array
+    {
+
+        $mockPdfInfo = $this->getMockBuilder(PDFInfo::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['analyzePdf', 'pageCount'])
+            ->getMock();
+
+        $mockPdfInfo->method('pageCount')
+            ->willReturnOnConsecutiveCalls(15, 1, 15, 1);
+
+        $container = new Container();
+        $container->add(ShellExec::class);
+        $container->add(VersionParser::class);
+        $container->add(PDFInfo::class, $mockPdfInfo);
+        $container->add(GhostScript::class)->addArgument($container);
+
+        $sourcePDFPath = dirname(__FILE__) . "/fixtures/pdf-v1.7.pdf";
+
+        $expectedVersion = '1.4';
+        return [$container, $sourcePDFPath, $expectedVersion, new Exception("Downgrade failed. Source PDF had 15 pages, but the target PDF had 1 pages.")];
+    }
+
+    /**
+     * @param Container $container
      *
      * @throws PackageNotInstalled
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      * @dataProvider providerTestConstruct
      */
-    public function test__construct(Container $container)
+    public
+    function test__construct(Container $container)
     {
         $ghostscript = new GhostScript($container);
         $this->assertInstanceOf(GhostScript::class, $ghostscript);
@@ -86,13 +161,15 @@ class GhostScriptTest extends TestCase
      * @return void
      * @dataProvider providerTestConstructExceptions
      */
-    public function testConstructExceptions(Container $container, $exception)
+    public
+    function testConstructExceptions(Container $container, $exception)
     {
         $this->expectExceptionObject($exception);
         $ghostscript = $container->get(GhostScript::class);
     }
 
-    public function providerTestConstructExceptions(): array
+    public
+    function providerTestConstructExceptions(): array
     {
         return [
             $this->ghostscriptNotInstalled(),
@@ -100,7 +177,8 @@ class GhostScriptTest extends TestCase
         ];
     }
 
-    private function ghostscriptNotInstalled(): array
+    private
+    function ghostscriptNotInstalled(): array
     {
         $container = new Container();
 
@@ -120,14 +198,16 @@ class GhostScriptTest extends TestCase
 
     }
 
-    public function providerTestConstruct(): array
+    public
+    function providerTestConstruct(): array
     {
         return [
             $this->ghostscriptInstalled()
         ];
     }
 
-    private function ghostscriptInstalled(): array
+    private
+    function ghostscriptInstalled(): array
     {
         $container = new Container();
 
@@ -147,7 +227,8 @@ class GhostScriptTest extends TestCase
         return [$container];
     }
 
-    private function pdfinfoNotInstalled(): array
+    private
+    function pdfinfoNotInstalled(): array
     {
         $container = new Container();
 
@@ -172,7 +253,8 @@ class GhostScriptTest extends TestCase
         return [$container, new PackageNotInstalled("PDFInfo is not installed. Please install PDFInfo and try again. (sudo apt-get install poppler-utils)")];
     }
 
-    public function providerTestDowngrade(): array
+    public
+    function providerTestDowngrade(): array
     {
         return [
             $this->validPdf(),
@@ -180,7 +262,8 @@ class GhostScriptTest extends TestCase
         ];
     }
 
-    private function validPdf(): array
+    private
+    function validPdf(): array
     {
         $container = new Container();
         $container->add(ShellExec::class);
@@ -194,7 +277,8 @@ class GhostScriptTest extends TestCase
         return [$container, $sourcePDFPath, $expectedVersion];
     }
 
-    private function pdfWithSpaceInPath(): array
+    private
+    function pdfWithSpaceInPath(): array
     {
         $container = new Container();
         $container->add(ShellExec::class);

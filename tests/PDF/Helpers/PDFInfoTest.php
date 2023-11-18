@@ -52,6 +52,8 @@ class PDFInfoTest extends TestCase
             $expected,
             json_decode(json_encode($pdfInfo), true)
         );
+
+        $this->assertEquals($expected['pages'], $pdfInfo->pageCount());
     }
 
     public function providerTestAnalyzePdf(): array
@@ -77,7 +79,7 @@ class PDFInfoTest extends TestCase
             'suspects' => 'no',
             'form' => 'none',
             'javaScript' => 'no',
-            'pages' => '15',
+            'pages' => 15,
             'encrypted' => 'no',
             'pageSize' => '612 x 792 pts (letter)',
             'pageRot' => '0',

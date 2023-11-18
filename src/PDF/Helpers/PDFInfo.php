@@ -28,7 +28,7 @@ class PDFInfo
     public ?string $suspects = null;
     public ?string $form = null;
     public ?string $javaScript = null;
-    public ?string $pages = null;
+    public ?int $pages = null;
     public ?string $encrypted = null;
     public ?string $pageSize = null;
     public ?string $pageRot = null;
@@ -84,5 +84,10 @@ class PDFInfo
             'Author' => 'author'
         ];
         return $map[$key];
+    }
+
+    public function pageCount():int
+    {
+        return $this->pages;
     }
 }
