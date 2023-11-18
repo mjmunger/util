@@ -16,6 +16,7 @@ namespace tests\PDF\Helpers;
 use Exception;
 use hphio\util\Exceptions\PackageNotInstalled;
 use hphio\util\Helpers\ShellExec;
+use hphio\util\PDF\Exceptions\PageCountMismatch;
 use hphio\util\PDF\Helpers\GhostScript;
 use hphio\util\PDF\Helpers\PDFInfo;
 use hphio\util\PDF\VersionParser;
@@ -132,7 +133,7 @@ class GhostScriptTest extends TestCase
         $sourcePDFPath = dirname(__FILE__) . "/fixtures/pdf-v1.7.pdf";
 
         $expectedVersion = '1.4';
-        return [$container, $sourcePDFPath, $expectedVersion, new Exception("Downgrade failed. Source PDF had 15 pages, but the target PDF had 1 pages.")];
+        return [$container, $sourcePDFPath, $expectedVersion, new PageCountMismatch("Downgrade failed. Source PDF had 15 pages, but the target PDF had 1 pages.")];
     }
 
     /**

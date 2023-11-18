@@ -15,6 +15,7 @@ namespace hphio\util\PDF\Helpers;
 
 use hphio\util\Exceptions\PackageNotInstalled;
 use hphio\util\Helpers\ShellExec;
+use hphio\util\PDF\Exceptions\PageCountMismatch;
 use League\Container\Container;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -48,7 +49,7 @@ class GhostScript
         $targetInfo->analyzePdf($outputFile);
 
         if($sourceInfo->pageCount() != $targetInfo->pageCount()) {
-            throw new \Exception("Downgrade failed. Source PDF had {$sourceInfo->pageCount()} pages, but the target PDF had {$targetInfo->pageCount()} pages.");
+            throw new PageCountMismatch("Downgrade failed. Source PDF had {$sourceInfo->pageCount()} pages, but the target PDF had {$targetInfo->pageCount()} pages.");
         }
     }
 
