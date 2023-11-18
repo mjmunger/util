@@ -48,7 +48,7 @@ class PDFInfo
     public function analyzePdf(string $pdfFile): void
     {
         $shell = $this->container->get(ShellExec::class);
-        $command = "pdfinfo '{$pdfFile}'";
+        $command = "pdfinfo {$pdfFile}";
         $shell->exec($command);
 
         $lines = explode("\n", $shell->getStdout());
