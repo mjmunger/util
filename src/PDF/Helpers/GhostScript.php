@@ -38,6 +38,7 @@ class GhostScript
     }
     public function downgrade($inputFile, $outputFile): void
     {
+        $inputFile = addcslashes($inputFile, ' ');
         $sourceInfo = $this->container->get(PDFInfo::class);
         $sourceInfo->analyzePdf($inputFile);
 
