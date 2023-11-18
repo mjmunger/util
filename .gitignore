@@ -6,3 +6,4 @@ composer.lock
 phpunit
 composer.phar
 /coverage.xml
+.phpunit.result.cache

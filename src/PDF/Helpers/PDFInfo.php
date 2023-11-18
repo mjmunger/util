@@ -36,6 +36,8 @@ class PDFInfo
     public ?string $optimized = null;
     public ?string $pdfVersion = null;
 
+    public ?string $author = null;
+
     protected ?Container $container = null;
 
     public function __construct(Container $container)
@@ -53,10 +55,10 @@ class PDFInfo
         foreach ($lines as $line) {
             $line = trim($line);
             if (empty($line)) continue;
-            $parts = explode(":", $line,2);
+            $parts = explode(":", $line, 2);
             $key = $this->translate(trim($parts[0]));
             $value = trim($parts[1]);
-            $this->$key = $value;
+            if (property_exists($this, $key)) $this->$key = $value;
         }
     }
 
@@ -78,7 +80,9 @@ class PDFInfo
             "Page rot" => 'pageRot',
             "File size" => 'filesize',
             "Optimized" => 'optimized',
-            "PDF version" => 'pdfVersion'];
+            "PDF version" => 'pdfVersion',
+            'Author' => 'author'
+        ];
         return $map[$key];
     }
 }

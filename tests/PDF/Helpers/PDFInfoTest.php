@@ -83,7 +83,8 @@ class PDFInfoTest extends TestCase
             'pageRot' => '0',
             'filesize' => '1721629 bytes',
             'optimized' => 'no',
-            'pdfVersion' => '1.6'
+            'pdfVersion' => '1.6',
+            'author' => null
         ];
 
         $pdfPath = dirname(__FILE__) . '/fixtures/COVID-19 Lockdown Policies at the State and Local Level.pdf';

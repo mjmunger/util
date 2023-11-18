@@ -16,6 +16,7 @@ namespace tests\PDF\Helpers;
 use hphio\util\Exceptions\PackageNotInstalled;
 use hphio\util\Helpers\ShellExec;
 use hphio\util\PDF\Helpers\GhostScript;
+use hphio\util\PDF\Helpers\PDFInfo;
 use hphio\util\PDF\VersionParser;
 use League\Container\Container;
 use PHPUnit\Framework\TestCase;
@@ -46,6 +47,14 @@ class GhostScriptTest extends TestCase
 
         $version = $container->get(VersionParser::class);
         $this->assertSame($expectedVersion, $version->getVersion($tempfile));
+
+        $sourceInfo = $container->get(PDFInfo::class);
+        $targetInfo = $container->get(PDFInfo::class);
+
+        $sourceInfo->analyzePdf($sourcePDFPath);
+        $targetInfo->analyzePdf($tempfile);
+
+        $this->assertSame($sourceInfo->pages, $targetInfo->pages);
 
         unlink($tempfile);
 
@@ -176,6 +185,7 @@ class GhostScriptTest extends TestCase
         $container = new Container();
         $container->add(ShellExec::class);
         $container->add(VersionParser::class);
+        $container->add(PDFInfo::class)->addArgument($container);
         $container->add(GhostScript::class)->addArgument($container);
 
         $sourcePDFPath = dirname(__FILE__) . "/fixtures/pdf-v1.7.pdf";
@@ -186,5 +196,15 @@ class GhostScriptTest extends TestCase
 
     private function pdfWithSpaceInPath(): array
     {
+        $container = new Container();
+        $container->add(ShellExec::class);
+        $container->add(VersionParser::class);
+        $container->add(PDFInfo::class)->addArgument($container);
+        $container->add(GhostScript::class)->addArgument($container);
+
+        $sourcePDFPath = dirname(__FILE__) . "/fixtures/COVID-19 Lockdown Policies at the State and Local Level.pdf";
+
+        $expectedVersion = '1.4';
+        return [$container, $sourcePDFPath, $expectedVersion];
     }
 }

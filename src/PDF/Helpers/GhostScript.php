@@ -37,9 +37,19 @@ class GhostScript
     }
     public function downgrade($inputFile, $outputFile): void
     {
+        $sourceInfo = $this->container->get(PDFInfo::class);
+        $sourceInfo->analyzePdf($inputFile);
+
         $command = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sOutputFile=$outputFile '{$inputFile}'";
         $shell = $this->container->get(ShellExec::class);
         $shell->exec($command);
+
+        $targetInfo = $this->container->get(PDFInfo::class);
+        $targetInfo->analyzePdf($outputFile);
+
+        if($sourceInfo->pages != $targetInfo->pages) {
+            throw new \Exception("Downgrade failed. Source PDF had {$sourceInfo->pages} pages, but the target PDF had {$targetInfo->pages} pages.");
+        }
     }
 
     /**
