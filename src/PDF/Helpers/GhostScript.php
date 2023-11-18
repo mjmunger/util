@@ -37,7 +37,7 @@ class GhostScript
     }
     public function downgrade($inputFile, $outputFile): void
     {
-        $command = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sOutputFile=$outputFile $inputFile";
+        $command = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sOutputFile=$outputFile '{$inputFile}'";
         $shell = $this->container->get(ShellExec::class);
         $shell->exec($command);
     }
@@ -47,13 +47,36 @@ class GhostScript
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    private function checkInstallation(): void
+    protected function checkInstallation(): void
+    {
+        $this->verifyGhostScript();
+        $this->verifyPdfInfo();
+    }
+
+    /**
+     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws PackageNotInstalled
+     */
+    protected function verifyGhostScript(): void
     {
         $command = "gs -v";
         $shell = $this->container->get(ShellExec::class);
         $shell->exec($command);
         if (!str_contains($shell->getStdout(), 'GPL Ghostscript')) {
-            throw new PackageNotInstalled("Ghostscript is not installed. Please install Ghostscript and try again.");
+            throw new PackageNotInstalled("Ghostscript is not installed. Please install Ghostscript and try again. (sudo apt-get install ghostscript)");
+        }
+    }
+
+    protected function verifyPdfInfo():void
+    {
+        $command = "pdfinfo -v";
+        /** @var ShellExec $shell */
+        $shell = $this->container->get(ShellExec::class);
+        $shell->exec($command);
+        if (!str_contains($shell->getStderr(), 'pdfinfo version')) {
+            throw new PackageNotInstalled("PDFInfo is not installed. Please install PDFInfo and try again. (sudo apt-get install poppler-utils)");
         }
     }
 }

@@ -42,11 +42,12 @@ class ShellExec
 
         $process = proc_open($command, $descriptorSpecs, $pipes, $cwd, $env);
 
-        if (is_resource($process)) {
-            $this->getResponse($pipes[1]);
-            $this->getErrors($pipes[2]);
-            $this->returnValue = proc_close($process);
+        if (!is_resource($process)) {
+            throw new Exception("Could not open process!");
         }
+        $this->getResponse($pipes[1]);
+        $this->getErrors($pipes[2]);
+        $this->returnValue = proc_close($process);
     }
 
     /**

@@ -25,15 +25,18 @@ use Psr\Container\NotFoundExceptionInterface;
 class GhostScriptTest extends TestCase
 {
 
-    public function testDowngrade()
+    /**
+     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @dataProvider providerTestDowngrade
+     */
+    public function testDowngrade(Container $container,
+                                  string    $sourcePDFPath,
+                                  string    $expectedVersion
+    )
     {
-        $container = new Container();
-        $container->add(ShellExec::class);
-        $container->add(VersionParser::class);
-        $container->add(GhostScript::class)->addArgument($container);
-
         $shell = $container->get(GhostScript::class);
-        $sourcePDFPath = dirname(__FILE__) . "/fixtures/pdf-v1.7.pdf";
         $this->assertFileExists($sourcePDFPath);
 
         $tempfile = tempnam(sys_get_temp_dir(), 'test_') . ".pdf";
@@ -42,7 +45,7 @@ class GhostScriptTest extends TestCase
         $this->assertFileExists($tempfile);
 
         $version = $container->get(VersionParser::class);
-        $this->assertSame('1.4', $version->getVersion($tempfile));
+        $this->assertSame($expectedVersion, $version->getVersion($tempfile));
 
         unlink($tempfile);
 
@@ -83,7 +86,8 @@ class GhostScriptTest extends TestCase
     public function providerTestConstructExceptions(): array
     {
         return [
-            $this->ghostscriptNotInstalled()
+            $this->ghostscriptNotInstalled(),
+            $this->pdfinfoNotInstalled()
         ];
     }
 
@@ -103,7 +107,7 @@ class GhostScriptTest extends TestCase
         $container->add(VersionParser::class);
         $container->add(GhostScript::class)->addArgument($container);
 
-        return [$container,new PackageNotInstalled("Ghostscript is not installed. Please install Ghostscript and try again.")];
+        return [$container, new PackageNotInstalled("Ghostscript is not installed. Please install Ghostscript and try again.")];
 
     }
 
@@ -124,9 +128,63 @@ class GhostScriptTest extends TestCase
             ->getMock();
 
         $shell->method('getStdout')
-            ->willReturn('GPL Ghostscript 9.26 (2018-11-20)');
+            ->willReturnOnConsecutiveCalls(
+                'GPL Ghostscript 9.26 (2018-11-20)',
+                'pdfinfo version 3.03'
+            );
+//            ->willReturn('GPL Ghostscript 9.26 (2018-11-20)');
 
         $container->add(ShellExec::class, $shell);
         return [$container];
+    }
+
+    private function pdfinfoNotInstalled(): array
+    {
+        $container = new Container();
+
+        $shell = $this->getMockBuilder(ShellExec::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getStdout', 'getStderr'])
+            ->getMock();
+
+        $shell->method('getStdout')
+            ->willReturnOnConsecutiveCalls(
+                'GPL Ghostscript 9.26 (2018-11-20)'
+            );
+
+        $shell->method('getStderr')
+            ->willReturnOnConsecutiveCalls('',
+                'bash: pdfinfo -v: command not found');
+
+        $container->add(ShellExec::class, $shell);
+        $container->add(VersionParser::class);
+        $container->add(GhostScript::class)->addArgument($container);
+
+        return [$container, new PackageNotInstalled("PDFInfo is not installed. Please install PDFInfo and try again. (sudo apt-get install poppler-utils)")];
+    }
+
+    public function providerTestDowngrade(): array
+    {
+        return [
+            $this->validPdf(),
+            $this->pdfWithSpaceInPath(),
+        ];
+    }
+
+    private function validPdf(): array
+    {
+        $container = new Container();
+        $container->add(ShellExec::class);
+        $container->add(VersionParser::class);
+        $container->add(GhostScript::class)->addArgument($container);
+
+        $sourcePDFPath = dirname(__FILE__) . "/fixtures/pdf-v1.7.pdf";
+
+        $expectedVersion = '1.4';
+        return [$container, $sourcePDFPath, $expectedVersion];
+    }
+
+    private function pdfWithSpaceInPath(): array
+    {
     }
 }
