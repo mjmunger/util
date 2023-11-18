@@ -56,6 +56,8 @@ class GhostScript
         $targetInfo->analyzePdf($outputFile);
 
         if($sourceInfo->pageCount() != $targetInfo->pageCount()) {
+            echo $shell->getStdout();
+            echo $shell->getStderr();
             throw new PageCountMismatch("Downgrade failed. Source PDF had {$sourceInfo->pageCount()} pages, but the target PDF had {$targetInfo->pageCount()} pages.");
         }
     }
