@@ -2,50 +2,237 @@
 
 namespace tests\TestScope;
 
+use hphio\util\ClassReader\ClassReader;
 use hphio\util\Helpers\ShellExec;
 use hphio\util\TestScope\ChangedFiles;
 use League\Container\Container;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use ReflectionClass;
 
 class ChangedFilesTest extends TestCase
 {
-    /**
-     * @param Container $container
-     *
-     * @return void
-     * @dataProvider providerTestDetectChanges
-     */
-    public function testDetectChanges(Container $container)
+    public function testConstruct()
     {
+        $container = new Container();
+        $diff = new ChangedFiles($container);
+
+        $class = new ReflectionClass($diff);
+        $prop = $class->getProperty('container');
+        $prop->setAccessible(true);
+        $this->assertSame($container, $prop->getValue($diff));
     }
 
-    public function providerTestDetectChanges(): array
+    /**
+     * @param Container $container
+     * @param string    $targetBranch
+     * @param string    $expectedChanges
+     *
+     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \ReflectionException
+     * @dataProvider providerTestDiffFilesWith
+     */
+    public function testDiffFilesWith(Container $container, string $targetBranch, string $expectedChanges)
+    {
+        $diff = $container->get(ChangedFiles::class);
+        $reflectedClass = new ReflectionClass($diff);
+        $method = $reflectedClass->getMethod('diffFilesWith');
+        $method->setAccessible(true);
+        $changes = $method->invoke($diff, $targetBranch);
+        $this->assertSame($expectedChanges, $changes);
+    }
+
+    /**
+     * @param Container $container
+     * @param string    $targetBranch
+     * @param array     $expectedNameSpaces
+     *
+     * @return void
+     * @dataProvider providerTestGetChangedNamespaces
+     */
+    public function testGetChangedNamespaces(Container $container, string $targetBranch, string $mockChanges, array $expectedNameSpaces)
+    {
+
+        $diff = $container->get(ChangedFiles::class);
+        $reflection = new ReflectionClass($diff);
+
+        $method = $reflection->getMethod('getNamespaces');
+        $method->setAccessible(true);
+        $namespaces = $method->invoke($diff, $mockChanges);
+
+        $this->assertSame($expectedNameSpaces, $namespaces);
+    }
+
+    /**
+     * @param Container $container
+     * @param           $expectedXml
+     * @param           $outputPath
+     * @param           $targetBranch
+     *
+     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \ReflectionException
+     * @dataProvider providerTestBuildXML
+     */
+    public function testBuildXML(Container $container, $sourceXML, $namespaces, \SimpleXMLElement $expectedXml)
+    {
+
+        $diff = $container->get(ChangedFiles::class);
+        $reflection = new ReflectionClass($diff);
+        $method = $reflection->getMethod('buildXml');
+        $method->setAccessible(true);
+
+        /** @var \SimpleXMLElement $xml */
+        $xml = $method->invoke($diff, $sourceXML, $namespaces);
+
+        $this->assertEquals($expectedXml->testsuites->directory->count(), $xml->testsuites->directory->count());
+        $this->assertEquals($expectedXml->testsuites->directory, $xml->testsuites->directory);
+    }
+
+    public function providerTestDiffFilesWith(): array
     {
         return [
-            $this->diffBranch()
+            $this->diffDev()
         ];
     }
 
-    private function diffBranch()
+    private function diffDev(): array
     {
 
         $container = new Container();
-        $container->add()
+        $container->add(ClassReader::class);
+        $container->add(ChangedFiles::class)->addArgument($container);
 
-        $buffer = [];
-        $buffer[] = 'src/Api/Clients/AdminUpdate941Wages.php';
-        $buffer[] = 'src/Api/Clients/Businessimpact/ClientBusinessImpact.php';
-        $buffer[] = 'src/Api/Clients/Receivables/GetClientReceivablesService.php';
-        $buffer[] = 'src/Api/Workflow/Analyzers/Workflow325.php';
-        $buffer[] = 'src/Api/Workflow/Analyzers/Workflow340.php';
 
+        $shellOutput = [];
+        $shellOutput[] = 'tests/TestScope/fixtures/Bar/BarClass.php';
+        $shellOutput[] = 'tests/TestScope/fixtures/Baz/BazClass.php';
+        $shellOutput[] = 'tests/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = ''; //Shell exec seems to end with a \n. Keep this here.
+
+        $expectedChanges = implode("\n", $shellOutput);
+        $mockShell = $this->getMockBuilder(ShellExec::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getStdout', 'exec'])
+            ->getMock();
+
+        $mockShell->expects($this->once())
+            ->method('exec')
+            ->with("git diff HEAD origin/dev --name-only");
+
+        $mockShell->expects($this->once())
+            ->method('getStdout')
+            ->willReturn($expectedChanges);
+
+        $container->add(ShellExec::class, $mockShell);
+
+        $targetBranch = 'origin/dev';
+
+        return [$container, $targetBranch, $expectedChanges];
+    }
+
+    public function providerTestBuildXML(): array
+    {
+        return [
+            $this->diffedXML()
+        ];
+    }
+
+    private function diffedXML(): array
+    {
+
+        $container = new Container();
+        $container->add(ClassReader::class);
+        $container->add(ChangedFiles::class)->addArgument($container);
+
+
+        $shellOutput = [];
+        $shellOutput[] = 'tests/TestScope/fixtures/Bar/BarClass.php';
+        $shellOutput[] = 'tests/TestScope/fixtures/Baz/BazClass.php';
+        $shellOutput[] = 'tests/TestScope/fixtures/Zorg/ZorgClass.php';
+
+        $expectedChanges = implode("\n", $shellOutput);
         $mockShell = $this->getMockBuilder(ShellExec::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getStdout'])
             ->getMock();
 
-        $mockShell->method('getStdout')->willReturn(implode("\n", $buffer));
+        $mockShell->method('getStdout')->willReturn($expectedChanges);
 
         $container->add(ShellExec::class, $mockShell);
+
+        $expectedPhpUnitXmlPath = dirname(__FILE__) . "/fixtures/phpunit/phpunit.xml";
+        $this->assertFileExists($expectedPhpUnitXmlPath);
+
+        $expectedXml = simplexml_load_file($expectedPhpUnitXmlPath);
+
+        $outputPath = dirname(__FILE__) . "/output/phpunit.xml";
+
+        if (file_exists($outputPath)) unlink($outputPath);
+
+        $this->assertFileDoesNotExist($outputPath);
+
+        $targetBranch = 'origin/dev';
+
+        $sourceXML = dirname(__FILE__) . "/fixtures/phpunit-docker.xml";
+        $this->assertFileExists($sourceXML);
+
+        $namespaces = [];
+        $namespaces[] = 'tests\TestScope\fixtures\Bar';
+        $namespaces[] = 'tests\TestScope\fixtures\Baz';
+        $namespaces[] = 'tests\TestScope\fixtures\Zorg';
+
+        return [$container, $sourceXML, $namespaces, $expectedXml];
+    }
+
+    public function providerTestGetChangedNamespaces(): array
+    {
+        return [
+            $this->nsdiff()
+        ];
+    }
+
+    private function nsdiff(): array
+    {
+
+        $container = new Container();
+        $container->add(ClassReader::class);
+        $container->add(ChangedFiles::class)->addArgument($container);
+
+
+        $shellOutput = [];
+        $shellOutput[] = 'tests/TestScope/fixtures/Bar/BarClass.php';
+        $shellOutput[] = 'tests/TestScope/fixtures/Baz/BazClass.php';
+        $shellOutput[] = 'tests/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = '';
+
+        $mockChanges = implode("\n", $shellOutput);
+        $mockShell = $this->getMockBuilder(ShellExec::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getStdout', 'exec'])
+            ->getMock();
+
+        $mockShell->expects($this->once())
+            ->method('exec')
+            ->with("git diff HEAD origin/dev --name-only");
+
+        $mockShell->expects($this->once())
+            ->method('getStdout')
+            ->willReturn($mockChanges);
+
+        $container->add(ShellExec::class, $mockShell);
+
+        $targetBranch = 'origin/dev';
+        $expectedNameSpaces = [];
+        $expectedNameSpaces[] = 'tests\TestScope\fixtures\Bar';
+        $expectedNameSpaces[] = 'tests\TestScope\fixtures\Baz';
+        $expectedNameSpaces[] = 'tests\TestScope\fixtures\Zorg';
+
+        return [$container, $targetBranch, $mockChanges, $expectedNameSpaces];
+
     }
 }

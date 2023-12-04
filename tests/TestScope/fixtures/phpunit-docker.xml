@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         bootstrap="bootstrap/bootstrap.php"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         extensionsDirectory="tools/phpunit.d/"
+         forceCoversAnnotation="false"
+         processIsolation="false"
+         stopOnError="true"
+         stopOnFailure="true"
+         stopOnIncomplete="false"
+         stopOnRisky="false"
+         stopOnSkipped="false"
+         timeoutForLargeTests="60"
+         timeoutForMediumTests="10"
+         timeoutForSmallTests="1"
+         verbose="true"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+  <coverage cacheDirectory="./build/cache"
+            includeUncoveredFiles="true"
+            processUncoveredFiles="true"
+            pathCoverage="false"
+            ignoreDeprecatedCodeUnits="true"
+            disableCodeCoverageIgnore="true">
+    <include>
+      <directory suffix=".php">./src/</directory>
+    </include>
+    <report>
+      <clover outputFile="coverage.xml"/>
+      <html outputDirectory="./build/logs/coverage"/>
+    </report>
+  </coverage>
+  <testsuites>
+    <testsuite name="api">
+      <directory suffix="Test.php">tests/Api</directory>
+    </testsuite>
+    <testsuite name="all">
+      <directory suffix="Test.php">tests/Api</directory>
+    </testsuite>
+    <!--    <testsuite name="regression">-->
+    <!--      <directory prefix="Issue" suffix="Test.php">tests/regression</directory>-->
+    <!--    </testsuite>-->
+    <!--    <testsuite name="csv_filters">-->
+    <!--      <directory suffix="Test.php">tests/unit/CsvSanitizer/Filters</directory>-->
+    <!--    </testsuite>-->
+  </testsuites>
+  <logging>
+    <testdoxHtml outputFile="./build/logs/coverage/testdox.html" />
+    <testdoxText outputFile="./build/logs/coverage/testdox.txt" />
+  </logging>
+  <php>
+    <var name="DB_DSN" value="mysql:dbname=erc_local"/>
+    <var name="DB_HOST" value="mariadb"/>
+    <var name="DB_USER" value="gitlab"/>
+    <var name="DB_PASSWD" value="letmein"/>
+    <var name="DB_DBNAME" value="erc_local"/>
+  </php>
+</phpunit>
