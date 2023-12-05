@@ -54,8 +54,10 @@ class ChangedFiles
             if (!file_exists($file)) {
                 continue;
             }
+            $path = getcwd() . '/' . $file;
+            var_dump($file, file_exists($file), $path);
             $reader = $this->container->get(ClassReader::class);
-            $reader->analyze(getcwd() . '/' . $file);
+            $reader->analyze($path);
             $class = new ReflectionClass($reader->fullClassPath());
             $attribNameSpaces[] = $class->getNamespaceName();
         }

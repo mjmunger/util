@@ -49,9 +49,13 @@ class ChangedFilesTest extends TestCase
     /**
      * @param Container $container
      * @param string    $targetBranch
+     * @param string    $mockChanges
      * @param array     $expectedNameSpaces
      *
      * @return void
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \ReflectionException
      * @dataProvider providerTestGetChangedNamespaces
      */
     public function testGetChangedNamespaces(Container $container, string $targetBranch, string $mockChanges, array $expectedNameSpaces)
@@ -68,14 +72,14 @@ class ChangedFilesTest extends TestCase
     }
 
     /**
-     * @param Container $container
-     * @param           $expectedXml
-     * @param           $outputPath
-     * @param           $targetBranch
+     * @param Container         $container
+     * @param                   $sourceXML
+     * @param                   $namespaces
+     * @param \SimpleXMLElement $expectedXml
      *
      * @return void
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \ReflectionException
      * @dataProvider providerTestBuildXML
      */
@@ -166,7 +170,7 @@ class ChangedFilesTest extends TestCase
 
         $container->add(ShellExec::class, $mockShell);
 
-        $expectedPhpUnitXmlPath = dirname(__FILE__) . "/fixtures/phpunit/phpunit.xml";
+        $expectedPhpUnitXmlPath = dirname(__FILE__) . "/fixtures/phpunit/phpunit-fixture.xml";
         $this->assertFileExists($expectedPhpUnitXmlPath);
 
         $expectedXml = simplexml_load_file($expectedPhpUnitXmlPath);
@@ -289,7 +293,7 @@ class ChangedFilesTest extends TestCase
 
         $container->add(ShellExec::class, $mockShell);
 
-        $expectedPhpUnitXmlPath = dirname(__FILE__) . "/fixtures/phpunit/phpunit.xml";
+        $expectedPhpUnitXmlPath = dirname(__FILE__) . "/fixtures/phpunit/phpunit-fixture.xml";
         $this->assertFileExists($expectedPhpUnitXmlPath);
 
         $expectedXml = simplexml_load_file($expectedPhpUnitXmlPath);
