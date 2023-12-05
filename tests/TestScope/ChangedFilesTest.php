@@ -378,4 +378,21 @@ class ChangedFilesTest extends TestCase
 
         return [$container, $targetBranch, $mockChanges, new NoChangedFilesException("No changed files found.")];
     }
+
+    /**
+     * @param \League\Container\Container $container
+     * @param string                      $targetBranch
+     * @param string                      $expectedChanges
+     *
+     * @return void
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @dataProvider providerTestDiffFilesWith
+     */
+    public function testGetRawDiff(Container $container, string $targetBranch, string $expectedChanges)
+    {
+        $diff = $container->get(ChangedFiles::class);
+        $changes = $diff->getRawDiff($targetBranch);
+        $this->assertSame($expectedChanges, $changes);
+    }
 }

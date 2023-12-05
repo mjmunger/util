@@ -31,6 +31,11 @@ class ChangedFiles
 
     }
 
+    public function getRawDiff(string $targetBranch): string
+    {
+        return $this->diffFileswith($targetBranch);
+    }
+
     protected function diffFilesWith(string $targetBranch)
     {
         $shellEx = $this->container->get(ShellExec::class);
