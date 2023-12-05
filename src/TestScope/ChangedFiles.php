@@ -49,6 +49,7 @@ class ChangedFiles
     protected function getNamespaces($changes): array
     {
         $attribNameSpaces = [];
+        if(is_null($changes)) return throw new \Exception("No changed files found.");
         $changedFiles = explode(PHP_EOL, $changes);
         foreach ($changedFiles as $file) {
             if (!file_exists($file)) {

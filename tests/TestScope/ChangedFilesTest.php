@@ -56,9 +56,9 @@ class ChangedFilesTest extends TestCase
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \ReflectionException
-     * @dataProvider providerTestGetChangedNamespaces
+     * @dataProvider providerTestGetNamespaces
      */
-    public function testGetChangedNamespaces(Container $container, string $targetBranch, string $mockChanges, array $expectedNameSpaces)
+    public function testGetNamespaces(Container $container, string $targetBranch, string $mockChanges, array $expectedNameSpaces)
     {
 
         $diff = $container->get(ChangedFiles::class);
@@ -195,7 +195,7 @@ class ChangedFilesTest extends TestCase
         return [$container, $sourceXML, $namespaces, $expectedXml];
     }
 
-    public function providerTestGetChangedNamespaces(): array
+    public function providerTestGetNamespaces(): array
     {
         return [
             $this->nsdiff()
@@ -312,5 +312,68 @@ class ChangedFilesTest extends TestCase
 
 
         return [$container, $sourceXML, $targetBranch, $outputPath, $expectedPhpUnitXmlPath];
+    }
+
+    /**
+     * @param \League\Container\Container $container
+     * @param string                      $targetBranch
+     * @param string                      $mockChanges
+     * @param array                       $expectedNameSpaces
+     *
+     * @return void
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \ReflectionException
+     * @dataProvider providerTestGetNamespacesExceptions
+     */
+    public function testGetNamespacesExceptions(Container $container, string $targetBranch, $mockChanges, \Exception $expectedException)
+    {
+
+        $diff = $container->get(ChangedFiles::class);
+        $reflection = new ReflectionClass($diff);
+
+        $method = $reflection->getMethod('getNamespaces');
+        $method->setAccessible(true);
+        $this->expectExceptionObject($expectedException);
+        $namespaces = $method->invoke($diff, $mockChanges);
+    }
+
+    public function providerTestGetNamespacesExceptions(): array
+    {
+        return [
+            $this->noChangedFiles()
+        ];
+    }
+
+    private function noChangedFiles():array
+    {
+
+        $container = new Container();
+        $container->add(ClassReader::class);
+        $container->add(ChangedFiles::class)->addArgument($container);
+
+
+        $shellOutput = null;
+
+        $mockChanges = null;
+        $mockShell = $this->getMockBuilder(ShellExec::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getStdout', 'exec'])
+            ->getMock();
+
+        $mockShell->expects($this->once())
+            ->method('exec')
+            ->with("git diff HEAD origin/dev --name-only");
+
+        $mockShell->expects($this->once())
+            ->method('getStdout')
+            ->willReturn($mockChanges);
+
+        $container->add(ShellExec::class, $mockShell);
+
+        $targetBranch = 'origin/dev';
+
+
+        return [$container, $targetBranch, $mockChanges, new \Exception("No changed files found.")];
     }
 }
