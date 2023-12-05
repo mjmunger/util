@@ -104,6 +104,7 @@ class ChangedFiles
         $xml = $this->buildXml($sourceXML, $namespaces);
         $dom = dom_import_simplexml($xml)->ownerDocument;
         $dom->formatOutput = true;
+        $dom->preserveWhiteSpace = false;
         $dom->save($outputPath);
     }
 
