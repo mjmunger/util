@@ -24,7 +24,8 @@
   "require": {
     "league/container": "^4.2",
     "hphio/queryrunner": "^1.0",
-    "ext-simplexml": "*"
+    "ext-simplexml": "*",
+    "ext-dom": "*"
   },
   "repositories": [
     {

@@ -19,6 +19,11 @@ class ChangedFiles
         $this->container = $container;
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \ReflectionException
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function getChangedNamespaces(string $targetBranch): array
     {
         $changes = $this->diffFileswith($targetBranch);
@@ -67,17 +72,20 @@ class ChangedFiles
 
         foreach ($namespaces as $namespace) {
             $directory = str_replace('\\', '/', $namespace);
-            $dir = $suites->addChild('directory', $directory);
+            $suite = $suites->addChild('testsuite', $directory);
+            $suite->addAttribute('name', str_replace('\\','-', $namespace));
+            $dir = $suite->addChild('directory', $directory);
             $dir->addAttribute('suffix', 'Test.php');
         }
         return $xml;
     }
 
-    private function removeTestSuites(SimpleXMLElement $xml): SimpleXMLElement
+    public function generateXML(string $sourceXML, string $targetBranch, string $outputPath): void
     {
-        unset($xml->testsuites);
-        return $xml;
+        $namespaces = $this->getChangedNamespaces($targetBranch);
+        $xml = $this->buildXml($sourceXML, $namespaces);
+        $dom = dom_import_simplexml($xml)->ownerDocument;
+        $dom->formatOutput = true;
+        $dom->save($outputPath);
     }
-
-
 }
