@@ -57,25 +57,23 @@ class ChangedFiles
     protected function getNamespaces($changes): array
     {
         $attribNameSpaces = [];
-        if(is_null($changes)) return throw new NoChangedFilesException("No changed files found.");
+        if (is_null($changes)) return throw new NoChangedFilesException("No changed files found.");
         $changedFiles = explode(PHP_EOL, $changes);
         foreach ($changedFiles as $file) {
-            if(!$this->isSourceFile($file)) {
+            if (!$this->isSourceFile($file)) {
                 continue;
             }
-            $testFile = $this->findTestFile($file);
-            if (!file_exists($testFile)) {
-                throw new TestNotFoundException("Could not find test file $testFile");
-            }
-            $path = getcwd() . '/' . $testFile;
-            if(!file_exists($path)) throw new \Exception("Could not find file $path");
-            $reader = $this->container->get(ClassReader::class);
-            $reader->analyze($path);
-            $class = new ReflectionClass($reader->fullClassPath());
-            $attribNameSpaces[] = $class->getNamespaceName();
+            $testPath = $this->findTestDirectory($file);
+
+            $attribNameSpaces[] = $testPath;
+
+//            if(!file_exists($testPath)) throw new \Exception("Could not find file $testPath");
+//            $reader = $this->container->get(ClassReader::class);
+//            $reader->analyze($testPath);
+//            $class = new ReflectionClass($reader->fullClassPath());
         }
 
-        return $attribNameSpaces;
+        return array_unique($attribNameSpaces);
     }
 
     protected function buildXml(string $sourceXML, array $namespaces): SimpleXMLElement
@@ -88,7 +86,7 @@ class ChangedFiles
         foreach ($namespaces as $namespace) {
             $directory = str_replace('\\', '/', $namespace);
             $suite = $suites->addChild('testsuite');
-            $suite->addAttribute('name', str_replace('\\','-', $namespace));
+            $suite->addAttribute('name', str_replace('\\', '-', $namespace));
             $dir = $suite->addChild('directory', $directory);
             $dir->addAttribute('suffix', 'Test.php');
         }
@@ -111,17 +109,23 @@ class ChangedFiles
 
     private function isSourceFile(string $file): bool
     {
-        if(!str_contains($file, '/')) return false;
+        if (!str_contains($file, '/')) return false;
         $parts = explode('/', $file);
         if (count($parts) < 2) return false;
         if ($parts[0] == 'src') return true;
         return false;
     }
-    private function findTestFile(string $file): string
+
+    private function findTestDirectory(string $file): string
     {
         $parts = explode('/', $file);
         $parts[0] = 'tests';
-        return implode('/', $parts);
+        array_pop($parts);
+        $path = implode('/', $parts);
+        if (!is_dir($path)) {
+            throw new TestNotFoundException("Could not find test directory: $path");
+        }
+        return str_replace('/', '\\', $path);
     }
 
     public function getShell(): ShellExec|null

@@ -159,9 +159,10 @@ class ChangedFilesTest extends TestCase
 
 
         $shellOutput = [];
-        $shellOutput[] = 'tests/TestScope/fixtures/Bar/BarClass.php';
-        $shellOutput[] = 'tests/TestScope/fixtures/Baz/BazClass.php';
-        $shellOutput[] = 'tests/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Bar/BarClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Baz/BazClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass2.php';
 
         $expectedChanges = implode("\n", $shellOutput);
         $mockShell = $this->getMockBuilder(ShellExec::class)
@@ -217,6 +218,7 @@ class ChangedFilesTest extends TestCase
         $shellOutput[] = 'src/TestScope/fixtures/Bar/BarClass.php';
         $shellOutput[] = 'src/TestScope/fixtures/Baz/BazClass.php';
         $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass2.php';
         $shellOutput[] = 'test/TestScope/fixtures/NotMe/Donotworryaboutme.php';
         $shellOutput[] = '';
 
@@ -454,7 +456,7 @@ class ChangedFilesTest extends TestCase
         $targetBranch = 'origin/dev';
 
 
-        return [$container, $targetBranch, $mockChanges, new TestNotFoundException("Could not find test file tests/TestScope/fixtures/Blarg/BlargClass.php")];
+        return [$container, $targetBranch, $mockChanges, new TestNotFoundException("Could not find test directory: tests/TestScope/fixtures/Blarg")];
 
     }
 
