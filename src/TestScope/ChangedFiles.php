@@ -53,11 +53,14 @@ class ChangedFiles
         if(is_null($changes)) return throw new NoChangedFilesException("No changed files found.");
         $changedFiles = explode(PHP_EOL, $changes);
         foreach ($changedFiles as $file) {
-            if (!file_exists($file)) {
+            if(!$this->isSourceFile($file)) {
                 continue;
             }
-            $path = getcwd() . '/' . $file;
-            var_dump($file, file_exists($file), $path);
+            $testFile = $this->findTestFile($file);
+            if (!file_exists($testFile)) {
+                continue;
+            }
+            $path = getcwd() . '/' . $testFile;
             $reader = $this->container->get(ClassReader::class);
             $reader->analyze($path);
             $class = new ReflectionClass($reader->fullClassPath());
@@ -96,5 +99,19 @@ class ChangedFiles
         $dom = dom_import_simplexml($xml)->ownerDocument;
         $dom->formatOutput = true;
         $dom->save($outputPath);
+    }
+
+    private function isSourceFile(string $file): bool
+    {
+        $parts = explode('/', $file);
+        if (count($parts) < 2) return false;
+        if ($parts[0] == 'src') return true;
+        return false;
+    }
+    private function findTestFile(string $file): string
+    {
+        $parts = explode('/', $file);
+        $parts[0] = 'tests';
+        return implode('/', $parts);
     }
 }

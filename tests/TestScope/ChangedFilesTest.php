@@ -212,9 +212,10 @@ class ChangedFilesTest extends TestCase
 
 
         $shellOutput = [];
-        $shellOutput[] = 'tests/TestScope/fixtures/Bar/BarClass.php';
-        $shellOutput[] = 'tests/TestScope/fixtures/Baz/BazClass.php';
-        $shellOutput[] = 'tests/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Bar/BarClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Baz/BazClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = 'test/TestScope/fixtures/NotMe/Donotworryaboutme.php';
         $shellOutput[] = '';
 
         $mockChanges = implode("\n", $shellOutput);
