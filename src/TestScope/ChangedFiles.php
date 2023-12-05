@@ -41,6 +41,7 @@ class ChangedFiles
     {
         $this->shell = $this->container->get(ShellExec::class);
         $cmd = "git diff HEAD {$targetBranch} --name-only";
+        $this->shell->exec($cmd);
         return $this->shell->getStdOut();
     }
 
