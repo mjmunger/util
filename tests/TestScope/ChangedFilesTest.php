@@ -257,7 +257,8 @@ class ChangedFilesTest extends TestCase
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @dataProvider providerTestGenerateXML
      */
-    public function testGenerateXML(Container $container, string $sourceXML, string $targetBranch, string $outputPath, string $expectedFile) {
+    public function testGenerateXML(Container $container, string $sourceXML, string $targetBranch, string $outputPath, string $expectedFile)
+    {
 
         $this->assertFileExists($sourceXML);
         $diff = $container->get(ChangedFiles::class);
@@ -284,17 +285,37 @@ class ChangedFilesTest extends TestCase
 
 
         $shellOutput = [];
-        $shellOutput[] = 'tests/TestScope/fixtures/Bar/BarClass.php';
-        $shellOutput[] = 'tests/TestScope/fixtures/Baz/BazClass.php';
-        $shellOutput[] = 'tests/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = '.gitlab-ci.yml';
+        $shellOutput[] = 'bin/phpunit-docker.xml';
+        $shellOutput[] = 'build-docker-phpunit.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Bar/BarClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Baz/BazClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = 'tests/Api/ApiServices/BaseServices/fixtures/getClient.json';
+        $shellOutput[] = 'tests/Api/Clients/fixtures/NewClientPackageTest.sql';
+        $shellOutput[] = 'tests/Api/Clients/fixtures/responses/newClientCalculationsRequest.json';
+        $shellOutput[] = 'tests/Api/Workflow/Analyzers/Workflow320Test.php';
+        $shellOutput[] = 'tests/Api/Workflow/Analyzers/Workflow410Test.php';
+        $shellOutput[] = 'tests/Api/Workflow/Analyzers/fixtures/Workflow410Test.sql';
+        $shellOutput[] = 'tests/Api/Workflow/Analyzers/fixtures/aorFinal.json';
+        $shellOutput[] = 'tests/Api/Workflow/Analyzers/fixtures/aorFinalFarts.json';
+        $shellOutput[] = 'tests/Api/Workflow/fixtures/EngineTest.sql';
+        $shellOutput[] = ''; //Shell exec seems to end with a \n. Keep this here.
 
         $expectedChanges = implode("\n", $shellOutput);
+
         $mockShell = $this->getMockBuilder(ShellExec::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getStdout'])
+            ->onlyMethods(['getStdout', 'exec'])
             ->getMock();
 
-        $mockShell->method('getStdout')->willReturn($expectedChanges);
+        $mockShell->expects($this->once())
+            ->method('exec')
+            ->with("git diff HEAD origin/dev --name-only");
+
+        $mockShell->expects($this->once())
+            ->method('getStdout')
+            ->willReturn($expectedChanges);
 
         $container->add(ShellExec::class, $mockShell);
 
@@ -313,7 +334,6 @@ class ChangedFilesTest extends TestCase
 
         $sourceXML = dirname(__FILE__) . "/fixtures/phpunit-docker.xml";
         $this->assertFileExists($sourceXML);
-
 
         return [$container, $sourceXML, $targetBranch, $outputPath, $expectedPhpUnitXmlPath];
     }
@@ -350,7 +370,7 @@ class ChangedFilesTest extends TestCase
         ];
     }
 
-    private function noChangedFiles():array
+    private function noChangedFiles(): array
     {
 
         $container = new Container();
@@ -407,7 +427,6 @@ class ChangedFilesTest extends TestCase
         $container->add(ChangedFiles::class)->addArgument($container);
 
 
-
         $shellOutput = [];
         $shellOutput[] = 'src/TestScope/fixtures/Bar/BarClass.php';
         $shellOutput[] = 'src/TestScope/fixtures/Blarg/BlargClass.php';
@@ -437,5 +456,21 @@ class ChangedFilesTest extends TestCase
 
         return [$container, $targetBranch, $mockChanges, new TestNotFoundException("Could not find test file tests/TestScope/fixtures/Blarg/BlargClass.php")];
 
+    }
+
+    public function testGetShell()
+    {
+        $container = new Container();
+        $thisShell = new ShellExec();
+        $diff = new ChangedFiles($container);
+
+        $reflection = new ReflectionClass($diff);
+        $prop = $reflection->getProperty('shell');
+        $prop->setAccessible(true);
+
+        $this->assertNotSame($thisShell, $diff->getShell());
+        $prop->setValue($diff, $thisShell);
+
+        $this->assertSame($thisShell, $diff->getShell());
     }
 }

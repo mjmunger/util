@@ -13,6 +13,7 @@ use SimpleXMLElement;
 class ChangedFiles
 {
     protected ?Container $container = null;
+    protected ?ShellExec $shell = null;
 
     public function __construct(Container $container)
     {
@@ -38,9 +39,9 @@ class ChangedFiles
 
     protected function diffFilesWith(string $targetBranch)
     {
-        $shellEx = $this->container->get(ShellExec::class);
+        $this->shell = $this->container->get(ShellExec::class);
         $cmd = "git diff HEAD {$targetBranch} --name-only";
-        return $shellEx->getStdOut();
+        return $this->shell->getStdOut();
     }
 
     /**
@@ -120,5 +121,10 @@ class ChangedFiles
         $parts = explode('/', $file);
         $parts[0] = 'tests';
         return implode('/', $parts);
+    }
+
+    public function getShell(): ShellExec|null
+    {
+        return $this->shell;
     }
 }
