@@ -32,7 +32,7 @@ class ChangedFiles
 
     }
 
-    public function getRawDiff(string $targetBranch): string
+    public function getRawDiff(string $targetBranch): string|null
     {
         return $this->diffFileswith($targetBranch);
     }
