@@ -5,6 +5,7 @@ namespace tests\TestScope;
 use hphio\util\ClassReader\ClassReader;
 use hphio\util\Helpers\ShellExec;
 use hphio\util\TestScope\ChangedFiles;
+use hphio\util\TestScope\NoChangedFilesException;
 use League\Container\Container;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
@@ -374,6 +375,6 @@ class ChangedFilesTest extends TestCase
         $targetBranch = 'origin/dev';
 
 
-        return [$container, $targetBranch, $mockChanges, new \Exception("No changed files found.")];
+        return [$container, $targetBranch, $mockChanges, new NoChangedFilesException("No changed files found.")];
     }
 }

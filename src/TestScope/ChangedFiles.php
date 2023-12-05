@@ -42,14 +42,15 @@ class ChangedFiles
      * @param $changes
      *
      * @return array
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \ReflectionException
+     * @throws \hphio\util\TestScope\NoChangedFilesException
      */
     protected function getNamespaces($changes): array
     {
         $attribNameSpaces = [];
-        if(is_null($changes)) return throw new \Exception("No changed files found.");
+        if(is_null($changes)) return throw new NoChangedFilesException("No changed files found.");
         $changedFiles = explode(PHP_EOL, $changes);
         foreach ($changedFiles as $file) {
             if (!file_exists($file)) {
