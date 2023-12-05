@@ -424,7 +424,7 @@ class ChangedFilesTest extends TestCase
 
         $mockShell->expects($this->once())
             ->method('exec')
-            ->with("git diff HEAD origin/dev --name-only 2&>1");
+            ->with("git diff HEAD origin/dev --name-only");
 
         $mockShell->expects($this->once())
             ->method('getStdout')
