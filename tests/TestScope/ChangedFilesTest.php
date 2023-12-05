@@ -6,6 +6,7 @@ use hphio\util\ClassReader\ClassReader;
 use hphio\util\Helpers\ShellExec;
 use hphio\util\TestScope\ChangedFiles;
 use hphio\util\TestScope\NoChangedFilesException;
+use hphio\util\TestScope\TestNotFoundException;
 use League\Container\Container;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
@@ -212,6 +213,7 @@ class ChangedFilesTest extends TestCase
 
 
         $shellOutput = [];
+        $shellOutput[] = '.foofile';
         $shellOutput[] = 'src/TestScope/fixtures/Bar/BarClass.php';
         $shellOutput[] = 'src/TestScope/fixtures/Baz/BazClass.php';
         $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass.php';
@@ -343,7 +345,8 @@ class ChangedFilesTest extends TestCase
     public function providerTestGetNamespacesExceptions(): array
     {
         return [
-            $this->noChangedFiles()
+            $this->noChangedFiles(),
+            $this->oneFileNotFound()
         ];
     }
 
@@ -394,5 +397,45 @@ class ChangedFilesTest extends TestCase
         $diff = $container->get(ChangedFiles::class);
         $changes = $diff->getRawDiff($targetBranch);
         $this->assertSame($expectedChanges, $changes);
+    }
+
+    private function oneFileNotFound(): array
+    {
+
+        $container = new Container();
+        $container->add(ClassReader::class);
+        $container->add(ChangedFiles::class)->addArgument($container);
+
+
+
+        $shellOutput = [];
+        $shellOutput[] = 'src/TestScope/fixtures/Bar/BarClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Blarg/BlargClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Baz/BazClass.php';
+        $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass.php';
+        $shellOutput[] = ''; //Shell exec seems to end with a \n. Keep this here.
+
+        $mockChanges = implode("\n", $shellOutput);
+
+        $mockShell = $this->getMockBuilder(ShellExec::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getStdout', 'exec'])
+            ->getMock();
+
+        $mockShell->expects($this->once())
+            ->method('exec')
+            ->with("git diff HEAD origin/dev --name-only");
+
+        $mockShell->expects($this->once())
+            ->method('getStdout')
+            ->willReturn($mockChanges);
+
+        $container->add(ShellExec::class, $mockShell);
+
+        $targetBranch = 'origin/dev';
+
+
+        return [$container, $targetBranch, $mockChanges, new TestNotFoundException("Could not find test file tests/TestScope/fixtures/Blarg/BlargClass.php")];
+
     }
 }

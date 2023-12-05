@@ -63,9 +63,10 @@ class ChangedFiles
             }
             $testFile = $this->findTestFile($file);
             if (!file_exists($testFile)) {
-                continue;
+                throw new TestNotFoundException("Could not find test file $testFile");
             }
             $path = getcwd() . '/' . $testFile;
+            if(!file_exists($path)) throw new \Exception("Could not find file $path");
             $reader = $this->container->get(ClassReader::class);
             $reader->analyze($path);
             $class = new ReflectionClass($reader->fullClassPath());
@@ -108,6 +109,7 @@ class ChangedFiles
 
     private function isSourceFile(string $file): bool
     {
+        if(!str_contains($file, '/')) return false;
         $parts = explode('/', $file);
         if (count($parts) < 2) return false;
         if ($parts[0] == 'src') return true;
