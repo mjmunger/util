@@ -74,7 +74,7 @@ class ChangedFiles
 
         foreach ($namespaces as $namespace) {
             $directory = str_replace('\\', '/', $namespace);
-            $suite = $suites->addChild('testsuite', $directory);
+            $suite = $suites->addChild('testsuite');
             $suite->addAttribute('name', str_replace('\\','-', $namespace));
             $dir = $suite->addChild('directory', $directory);
             $dir->addAttribute('suffix', 'Test.php');
@@ -82,6 +82,11 @@ class ChangedFiles
         return $xml;
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \ReflectionException
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function generateXML(string $sourceXML, string $targetBranch, string $outputPath): void
     {
         $namespaces = $this->getChangedNamespaces($targetBranch);

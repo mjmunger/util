@@ -95,6 +95,7 @@ class ChangedFilesTest extends TestCase
         $xml = $method->invoke($diff, $sourceXML, $namespaces);
 
         $this->assertEquals($expectedXml->testsuites->testsuite->directory->count(), $xml->testsuites->testsuite->directory->count());
+        $this->assertEquals($expectedXml->testsuites, $xml->testsuites);
         $this->assertEquals($expectedXml->testsuites->directory, $xml->testsuites->directory);
     }
 
