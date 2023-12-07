@@ -219,6 +219,7 @@ class ChangedFilesTest extends TestCase
         $shellOutput[] = 'src/TestScope/fixtures/Baz/BazClass.php';
         $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass.php';
         $shellOutput[] = 'src/TestScope/fixtures/Zorg/ZorgClass2.php';
+        $shellOutput[] = 'src/TestScope/fixtures/src/Cli/NeverGive/YouUp.php';
         $shellOutput[] = 'test/TestScope/fixtures/NotMe/Donotworryaboutme.php';
         $shellOutput[] = '';
 

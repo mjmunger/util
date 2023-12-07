@@ -60,6 +60,7 @@ class ChangedFiles
         if (is_null($changes)) return throw new NoChangedFilesException("No changed files found.");
         $changedFiles = explode(PHP_EOL, $changes);
         foreach ($changedFiles as $file) {
+            if(str_contains($file, 'src/Cli')) continue;
             if (!$this->isSourceFile($file)) {
                 continue;
             }
